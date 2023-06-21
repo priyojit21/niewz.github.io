@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Newsapp</title>
+    <link rel="stylesheet" text="text/css" href="css/style.css">
+    <script src="https://kit.fontawesome.com/96b1529c4e.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <!-- nav contains logo , ipl,finance links and searcg bar -->
+    <nav>
+        <div class="main-nav container flex">
+            <a href="#">
+                <!-- jokn logo te click korbo amar page reload hoye jabe -->
+                <img class="logo" src="./images/1000_F_604833596_KYbYKPAkVSrAlLSXAmSnNIMcQc8zgI5F.jpg"
+                onclick="reload()" alt="logo">
+            </a>
+            <div class="nav-links">
+                <ul class="link flex" id="sidemenu">
+                    <li class="hover-link nav-item" href="#" id="ipl" onclick="onNavitemclick('ipl')">IPL</li>
+                    <li class="hover-link nav-item" href="#" id="finance" onclick="onNavitemclick('finance')">Finance
+                    </li>
+                    <li class="hover-link nav-item" href="#" id="Politics" onclick="onNavitemclick('Politics')">Politics
+                    </li>
+                    <li class="hover-link nav-item" href="#" id="technology" onclick="onNavitemclick('technology')">Technology
+                    </li>
+                    <i class="fas fa-times" onclick="closemenu()"></i>
+                </ul>
+                <i class="fas fa-bars" onclick="openmenu()"></i>
+            </div>
+            <div class="search-bar flex">
+                <input id="search" class="news-input" type="text" placeholder="eg. Science">
+                <button id="search-button" class="submit" type="submit">Go</button>
+            </div>
+
+        </div>
+    </nav>
+
+    <main>
+        <div class="cards-container container flex" id="cards-container">
+
+        </div>
+    </main>
+
+    <template id="news-template">
+        <div class="card">
+            <div class="card-header">
+                <img id="news-image" src="https://via.placeholder.com/400x200" alt="news">
+            </div>
+            <div class="card-content">
+                <h3 id="news-title">This is title</h3>
+                <h6 class="news-source" id="news-source">End Gadget</h6>
+                <p class="news-desc" id="news-desc">Lorem ipsum dolor sit amet consectetur adipisicing elit. Veniam
+                    magnam deleniti ducimus praesentium eligendi alias et qui, expedita quam. Nam error ipsam
+                    veritatis placeat ipsa, ea exercitationem assumenda. Deserunt, veniam.</p>
+            </div>
+        </div>
+    </template>
+    <script type="module" src="server.js"></script>
+    <script>
+        const API_KEY = "f05293a535b44b3a9153479093cdf893";
+        const url = "https://newsapi.org/v2/everything?q=";
+
+        window.addEventListener('load', () => fetchNews("tesla"));
+        async function fetchNews(query) {
+            // fetch (api_key)
+            const res = await fetch(`${url}${query}&apikey=${API_KEY}`);
+            const data = await res.json();
+            console.log(data);
+            bindData(data.articles);
+        }
+
+        function bindData(articles) {
+            const cardscontainer = document.getElementById('cards-container');
+            const newstemplate = document.getElementById('news-template');
+
+            cardscontainer.innerHTML = ' ';
+
+            articles.forEach((article) => {
+                if (!article.urlToImage) return;
+                const cardclone = newstemplate.content.cloneNode(true);
+                fillDatainCard(cardclone, article);
+                cardscontainer.appendChild(cardclone);
+            });
+        }
+
+        function fillDatainCard(cardclone, article) {
+            const newsimg = cardclone.querySelector("#news-image");
+            const newstitle = cardclone.querySelector("#news-title");
+            const newsdesc = cardclone.querySelector("#news-desc");
+            const newssource = cardclone.querySelector("#news-source");
+
+            newsimg.src = article.urlToImage;
+            newstitle.innerHTML = article.title;
+            newsdesc.innerHTML = article.description;
+
+
+            const date = new Date(article.publishedAt).toLocaleString("en-US", {
+                timeZone: "Asia/Jakarta"
+            })
+            newssource.innerHTML = `${article.source.name} . ${date}`;
+
+            cardclone.firstElementChild.addEventListener("click", () => {
+                // new tab will open
+                window.open(article.url, "_blank");
+            });
+        }
+
+        const search = document.getElementById("search");
+        const searchbutton = document.getElementById("search-button");
+
+        searchbutton.addEventListener("click", () => {
+            const query = search.value;
+            if (!query) return;
+            fetchNews(query);
+        })
+
+        let selectednavitem = null;
+        function onNavitemclick(query) {
+            fetchNews(query);
+            navitem = document.getElementById(query);
+            selectednavitem?.classList.remove('active');
+            selectednavitem = navitem;
+            selectednavitem.classList.add('active');
+        }
+
+        // reload korar function
+        function reload() {
+            window.location.reload();
+        }
+
+        var sidemenu = document.getElementById("sidemenu");
+
+        function openmenu() {
+            sidemenu.style.right = "0";
+        }
+        function closemenu() {
+            sidemenu.style.right = "-200px";
+        }
+    </script>
+</body>
+
+</html>
